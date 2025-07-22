@@ -6,7 +6,7 @@ def get_connector(connector_type, config):
         from .excel_connector import ExcelConnector
         return ExcelConnector(config)
     elif connector_type == "googlesheets":
-        from .googlesheets_connector import GoogleSheetsConnector
+        from .google_sheets_connector import GoogleSheetsConnector
         return GoogleSheetsConnector(config)
     elif connector_type == "hubspot":
         from .hubspot_connector import HubSpotConnector
@@ -21,7 +21,7 @@ def get_connector(connector_type, config):
         from .mysql_connector import MySQLConnector
         return MySQLConnector(config)
     elif connector_type == "mongo":
-        from .mongo_connector import MongoConnector
+        from .mongodb_connector import MongoConnector
         return MongoConnector(config)
     elif connector_type == "postgresql":
         from .postgresql_connector import PostgreSQLConnector

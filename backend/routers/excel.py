@@ -1,18 +1,14 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
+from backend.connectors.excel_connector import ExcelConnector
+from backend.schemas.excel import ExcelConnection, ExcelFetchRequest
 
 router = APIRouter(
-    prefix="/conectores/excel",
-    tags=["excel"]
+    prefix="/excel",
+    tags=["excel"],
 )
 
-@router.post("/test_connection")
-async def test_connection(data: dict):
-    return {"ok": True, "mensaje": "Conexión a Excel exitosa."}
-
-@router.post("/fetch_data")
-async def fetch_data(data: dict):
-    return [{"id": 1, "dato": "Dato Excel"}]
-
-@router.post("/get_schema")
-async def get_schema(data: dict):
-    return ["id", "dato"]
+@router.post("/fetch-data/")
+def fetch_excel_data(request: ExcelFetchRequest):
+    connector = ExcelConnector(request.file_path, request.sheet_name)
+    data = connector.fetch_data(request.fields)
+    return {"data": data}

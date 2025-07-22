@@ -1,18 +1,22 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
+from backend.connectors.airtable_connector import AirtableConnector
+from backend.schemas.airtable import AirtableConnection, AirtableFetchRequest
 
 router = APIRouter(
-    prefix="/conectores/airtable",
-    tags=["airtable"]
+    prefix="/airtable",
+    tags=["airtable"],
 )
 
-@router.post("/test_connection")
-async def test_connection(data: dict):
-    return {"ok": True, "mensaje": "Conexión a Airtable exitosa."}
+@router.post("/test-connection/")
+def test_airtable_connection(conn: AirtableConnection):
+    connector = AirtableConnector(conn.api_key, conn.base_id)
+    if connector.test_connection():
+        return {"status": "success", "message": "Conexión exitosa con Airtable"}
+    else:
+        raise HTTPException(status_code=400, detail="No se pudo conectar con Airtable")
 
-@router.post("/fetch_data")
-async def fetch_data(data: dict):
-    return [{"id": 1, "dato": "Dato Airtable"}]
-
-@router.post("/get_schema")
-async def get_schema(data: dict):
-    return ["id", "dato"]
+@router.post("/fetch-data/")
+def fetch_airtable_data(request: AirtableFetchRequest):
+    connector = AirtableConnector(request.api_key, request.base_id)
+    data = connector.fetch_data(request.table, request.fields, request.filters)
+    return {"data": data}

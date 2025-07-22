@@ -1,18 +1,22 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
+from backend.connectors.oracle_connector import OracleConnector
+from backend.schemas.oracle import OracleConnection, OracleQueryRequest
 
 router = APIRouter(
-    prefix="/conectores/oracle",
-    tags=["oracle"]
+    prefix="/oracle",
+    tags=["oracle"],
 )
 
-@router.post("/test_connection")
-async def test_connection(data: dict):
-    return {"ok": True, "mensaje": "Conexión a Oracle exitosa."}
+@router.post("/test-connection/")
+def test_oracle_connection(conn: OracleConnection):
+    connector = OracleConnector(conn.host, conn.port, conn.service_name, conn.username, conn.password)
+    if connector.test_connection():
+        return {"status": "success", "message": "Conexión exitosa con Oracle"}
+    else:
+        raise HTTPException(status_code=400, detail="No se pudo conectar con Oracle")
 
-@router.post("/fetch_data")
-async def fetch_data(data: dict):
-    return [{"id": 1, "dato": "Dato Oracle"}]
-
-@router.post("/get_schema")
-async def get_schema(data: dict):
-    return ["id", "dato"]
+@router.post("/execute/")
+def execute_oracle_query(request: OracleQueryRequest):
+    connector = OracleConnector(request.host, request.port, request.service_name, request.username, request.password)
+    data = connector.execute_query(request.query, request.params)
+    return {"data": data}

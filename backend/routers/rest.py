@@ -1,18 +1,22 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
+from backend.connectors.rest_connector import RESTConnector
+from backend.schemas.rest import RESTConnection, RESTFetchRequest
 
 router = APIRouter(
-    prefix="/conectores/rest",
-    tags=["rest"]
+    prefix="/rest",
+    tags=["rest"],
 )
 
-@router.post("/test_connection")
-async def test_connection(data: dict):
-    return {"ok": True, "mensaje": "Conexión a API REST exitosa."}
+@router.post("/test-connection/")
+def test_rest_connection(conn: RESTConnection):
+    connector = RESTConnector(conn.url, conn.headers)
+    if connector.test_connection():
+        return {"status": "success", "message": "Conexión exitosa con REST API"}
+    else:
+        raise HTTPException(status_code=400, detail="No se pudo conectar con REST API")
 
-@router.post("/fetch_data")
-async def fetch_data(data: dict):
-    return [{"id": 1, "dato": "Dato REST"}]
-
-@router.post("/get_schema")
-async def get_schema(data: dict):
-    return ["id", "dato"]
+@router.post("/fetch-data/")
+def fetch_rest_data(request: RESTFetchRequest):
+    connector = RESTConnector(request.url, request.headers)
+    data = connector.fetch_data(request.endpoint, request.method, request.params, request.body)
+    return {"data": data}

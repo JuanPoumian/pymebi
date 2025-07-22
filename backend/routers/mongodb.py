@@ -1,18 +1,22 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
+from backend.connectors.mongodb_connector import MongoDBConnector
+from backend.schemas.mongodb import MongoDBConnection, MongoDBFetchRequest
 
 router = APIRouter(
-    prefix="/conectores/mongodb",
-    tags=["mongodb"]
+    prefix="/mongodb",
+    tags=["mongodb"],
 )
 
-@router.post("/test_connection")
-async def test_connection(data: dict):
-    return {"ok": True, "mensaje": "Conexión a MongoDB exitosa."}
+@router.post("/test-connection/")
+def test_mongodb_connection(conn: MongoDBConnection):
+    connector = MongoDBConnector(conn.uri, conn.database)
+    if connector.test_connection():
+        return {"status": "success", "message": "Conexión exitosa con MongoDB"}
+    else:
+        raise HTTPException(status_code=400, detail="No se pudo conectar con MongoDB")
 
-@router.post("/fetch_data")
-async def fetch_data(data: dict):
-    return [{"id": 1, "dato": "Dato MongoDB"}]
-
-@router.post("/get_schema")
-async def get_schema(data: dict):
-    return ["id", "dato"]
+@router.post("/fetch-data/")
+def fetch_mongodb_data(request: MongoDBFetchRequest):
+    connector = MongoDBConnector(request.uri, request.database)
+    data = connector.fetch_data(request.collection, request.filter)
+    return {"data": data}

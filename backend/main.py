@@ -1,24 +1,24 @@
-# backend/main.py
-
 from fastapi import FastAPI
+from backend.routers import users
 
-# Importa TODOS los routers de tus conectores
+# Importa todos los routers de tus conectores
 from backend.routers import (
     odoo,
     hubspot,
-    rest,
     sqlserver,
+    rest,
+    google_sheets,
     mysql,
     postgresql,
     mongodb,
     oracle,
     sap,
     bigquery,
-    google_sheets,
     airtable,
     contpaqi,
     excel,
-    # Agrega aquí otros conectores personalizados si necesitas
+    generic,
+    # Puedes agregar más si lo necesitas después
 )
 
 app = FastAPI(
@@ -30,18 +30,21 @@ app = FastAPI(
 # Incluye cada router
 app.include_router(odoo.router)
 app.include_router(hubspot.router)
-app.include_router(rest.router)
 app.include_router(sqlserver.router)
+app.include_router(rest.router)
+app.include_router(google_sheets.router)
 app.include_router(mysql.router)
 app.include_router(postgresql.router)
 app.include_router(mongodb.router)
 app.include_router(oracle.router)
 app.include_router(sap.router)
 app.include_router(bigquery.router)
-app.include_router(google_sheets.router)
 app.include_router(airtable.router)
 app.include_router(contpaqi.router)
 app.include_router(excel.router)
+app.include_router(generic.router)
+app.include_router(users.router) 
+
 
 # Ruta raíz opcional
 @app.get("/")

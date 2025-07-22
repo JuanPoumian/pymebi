@@ -1,12 +1,14 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 
-class ClientCreate(BaseModel):
+class ClientBase(BaseModel):
     name: str
-    email: str
+    email: EmailStr
 
-class ClientOut(BaseModel):
+class ClientCreate(ClientBase):
+    pass
+
+class ClientRead(ClientBase):
     id: int
-    name: str
-    email: str
+
     class Config:
         orm_mode = True

@@ -1,18 +1,22 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
+from backend.connectors.google_sheets_connector import GoogleSheetsConnector
+from backend.schemas.googlesheets import GoogleSheetsConnection, GoogleSheetsFetchRequest
 
 router = APIRouter(
-    prefix="/conectores/google_sheets",
-    tags=["google_sheets"]
+    prefix="/google-sheets",
+    tags=["google-sheets"],
 )
 
-@router.post("/test_connection")
-async def test_connection(data: dict):
-    return {"ok": True, "mensaje": "Conexión a Google Sheets exitosa."}
+@router.post("/test-connection/")
+def test_google_sheets_connection(conn: GoogleSheetsConnection):
+    connector = GoogleSheetsConnector(conn.credentials_json, conn.spreadsheet_id)
+    if connector.test_connection():
+        return {"status": "success", "message": "Conexión exitosa con Google Sheets"}
+    else:
+        raise HTTPException(status_code=400, detail="No se pudo conectar con Google Sheets")
 
-@router.post("/fetch_data")
-async def fetch_data(data: dict):
-    return [{"id": 1, "dato": "Dato Google Sheets"}]
-
-@router.post("/get_schema")
-async def get_schema(data: dict):
-    return ["id", "dato"]
+@router.post("/fetch-data/")
+def fetch_google_sheets_data(request: GoogleSheetsFetchRequest):
+    connector = GoogleSheetsConnector(request.credentials_json, request.spreadsheet_id)
+    data = connector.fetch_data(request.range, request.major_dimension)
+    return {"data": data}
